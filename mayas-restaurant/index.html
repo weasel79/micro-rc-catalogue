@@ -159,8 +159,15 @@ img.maya{-webkit-user-drag:none;user-select:none}
 .slot.ok{color:var(--basil)}
 .slot.note{font-weight:600;font-size:13px;color:var(--muted)}
 #settings{padding-bottom:16px}
-#dbg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:30;width:32px;height:32px;padding:0;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);font-family:var(--display);font-size:16px;line-height:1;box-shadow:0 3px 0 var(--ink)}
-#dbg.on{background:var(--tomato);color:var(--paper)}
+#gear{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:max(16px,calc(env(safe-area-inset-right,0px) + 10px));z-index:30;width:40px;height:40px;padding:6px;border-radius:50%;border:2.5px solid var(--ink);background:var(--paper);color:var(--ink);box-shadow:0 3px 0 var(--ink);display:grid;place-items:center}
+#gear svg{width:24px;height:24px;display:block}
+#gear:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.newgame{display:flex;flex-direction:column;gap:10px;max-width:440px;padding-bottom:16px}
+.newgame input{font:inherit;font-weight:800;font-size:20px;padding:10px 14px;border:3px solid var(--ink);border-radius:14px;background:var(--paper);color:var(--ink);box-shadow:inset 0 3px 0 rgba(59,34,24,.12);min-width:0}
+.newgame .level{opacity:.7}.newgame .level.sel{opacity:1;outline:4px solid var(--tomato);outline-offset:3px}
+.slot.warn{color:var(--tomato);font-weight:800}
+.lang.dbg{max-width:320px}
+#startBtns{margin-top:6px}
 #bistro{position:relative}
 .bis-head{background:var(--paper);border:3px solid var(--ink);border-radius:18px;overflow:hidden;box-shadow:0 4px 0 var(--ink);flex:none}
 .bis-stats{display:flex;gap:4px 16px;flex-wrap:wrap;padding:8px 12px;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
@@ -218,50 +225,56 @@ img.maya{-webkit-user-drag:none;user-select:none}
 </head>
 <body>
 <div id="app">
-  <button id="dbg" type="button" aria-label="Debug: unlock all recipes">D</button>
-  <section id="home" class="screen scroll">
+  <button id="gear" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm8.4 4.6-.1-2.4 2-1.6-2-3.4-2.4.9-2-1.2L15.5 3h-4l-.4 2.5-2 1.2-2.4-.9-2 3.4 2 1.6v2.4l-2 1.6 2 3.4 2.4-.9 2 1.2.4 2.5h4l.4-2.5 2-1.2 2.4.9 2-3.4-2-1.6Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="var(--paper)"/></svg></button>
+
+  <section id="start" class="screen scroll">
     <header class="hero">
       <div class="pip-wrap" data-pip="idle"></div>
-      <h1 data-i18n="Maya's Restaurant">Maya's Restaurant</h1>
+      <h1 id="startName">Maya's Restaurant</h1>
       <p class="lede" data-i18n="Chop, stir, flip and bake your way from fruit salad to soufflé.">Chop, stir, flip and bake your way from fruit salad to soufflé.</p>
     </header>
-    <h2 class="label" data-i18n="Who's cooking?">Who's cooking?</h2>
-    <div class="levels">
+    <div class="savebox" id="startBtns">
+      <button class="btn" id="contBtn" type="button" data-i18n="Continue">Continue</button>
+      <p class="slot" id="slotInfo"></p>
+      <button class="btn alt" id="loadBtn" type="button" data-i18n="Load game">Load game</button>
+      <p class="slot" id="loadInfo"></p>
+      <button class="btn alt" id="newBtn" type="button" data-i18n="New game">New game</button>
+      <p class="slot note" data-i18n="Progress is saved automatically.">Progress is saved automatically.</p>
+    </div>
+    <form class="newgame" id="newForm" hidden>
+      <label class="label" for="newName" data-i18n="Restaurant name">Restaurant name</label>
+      <input id="newName" type="text" maxlength="24" autocomplete="off" spellcheck="false">
+      <h3 class="label" data-i18n="Difficulty">Difficulty</h3>
+    <div class="levels" id="newLevels">
       <button class="level" data-level="little" type="button"><span class="lname" data-i18n="Little Chef">Little Chef</span><span class="age" data-i18n="Ages 3–6">Ages 3–6</span><span class="ldesc" data-i18n="No timers, big targets. Every dish turns out yummy.">No timers, big targets. Every dish turns out yummy.</span></button>
       <button class="level" data-level="home" type="button"><span class="lname" data-i18n="Home Cook">Home Cook</span><span class="age" data-i18n="Ages 7–11">Ages 7–11</span><span class="ldesc" data-i18n="Timers and scores. Earn three stars on every recipe.">Timers and scores. Earn three stars on every recipe.</span></button>
       <button class="level" data-level="head" type="button"><span class="lname" data-i18n="Head Chef">Head Chef</span><span class="age" data-i18n="Ages 12+">Ages 12+</span><span class="ldesc" data-i18n="Tight timing, hidden counters and extra recipe steps.">Tight timing, hidden counters and extra recipe steps.</span></button>
     </div>
-    <div class="foot-row"><span id="homeStars"></span><button class="ghost" id="setBtn" type="button" data-i18n="Menu">Menu</button></div>
+      <p class="slot warn" id="newWarn" data-i18n="This replaces your current game." hidden>This replaces your current game.</p>
+      <div class="savebtns"><button type="submit" class="btn" data-i18n="Let's cook!">Let's cook!</button><button type="button" class="btn alt" id="newCancel" data-i18n="Cancel">Cancel</button></div>
+    </form>
   </section>
 
   <section id="settings" class="screen scroll" hidden>
     <div class="bar"><button class="ghost" id="setBack" type="button" data-i18n="‹ Back">‹ Back</button></div>
-    <div class="start-head"><div class="pip-sm" data-pip="bust"></div><h2 class="set-title" data-i18n="Maya's Restaurant">Maya's Restaurant</h2></div>
+    <h2 class="set-title" data-i18n="Settings">Settings</h2>
     <h3 class="label" data-i18n="Game">Game</h3>
-    <div class="savebox">
-      <div class="savebtns" id="saveBtns">
-        <button class="btn" id="newBtn" type="button" data-i18n="New game">New game</button>
-        <button class="btn alt" id="loadBtn" type="button" data-i18n="Load game">Load game</button>
-        <button class="btn alt" id="saveBtn" type="button" data-i18n="Save game">Save game</button>
-      </div>
-      <div class="confirm" id="newConfirm" hidden>
-        <p data-i18n="Start over? All stars and bistro earnings will be reset. Your saved game stays.">Start over?</p>
-        <div class="savebtns"><button class="btn danger" id="newYes" type="button" data-i18n="Yes, start over">Yes, start over</button><button class="btn alt" id="newNo" type="button" data-i18n="Cancel">Cancel</button></div>
-      </div>
-      <p class="slot" id="slotInfo"></p>
-      <p class="slot ok" id="saveMsg" role="status" hidden></p>
-      <p class="slot note" data-i18n="Progress is also kept automatically in this browser. ‹ Back continues where you left off.">Progress is also kept automatically in this browser.</p>
-    </div>
-    <h3 class="label" data-i18n="Language">Language</h3>
-    <div class="langs" id="langs"></div>
+    <div class="savebox"><button class="btn alt" id="saveBtn" type="button" data-i18n="Save game">Save game</button><p class="slot" id="saveInfo"></p><p class="slot ok" id="saveMsg" role="status" hidden></p></div>
     <h3 class="label" data-i18n="Sound">Sound</h3>
     <div class="vol"><label for="musVol" data-i18n="Music">Music</label><input type="range" id="musVol" min="0" max="100" step="1"><span id="musVal"></span></div>
     <div class="vol-now"><span id="musNow"></span><button class="ghost" id="musNext" type="button" data-i18n="Next track">Next track</button></div>
     <div class="vol"><label for="sfxVol" data-i18n="Effects">Effects</label><input type="range" id="sfxVol" min="0" max="100" step="1"><span id="sfxVal"></span></div>
+    <h3 class="label" data-i18n="Language">Language</h3>
+    <div class="langs" id="langs"></div>
+    <h3 class="label" data-i18n="Difficulty">Difficulty</h3>
+    <div class="langs" id="diffs"></div>
+    <h3 class="label">Debug</h3>
+    <button class="lang dbg" id="dbgTgl" type="button"></button>
+    <div class="row set-row"><button class="btn alt" id="toStart" type="button" data-i18n="Back to start">Back to start</button></div>
   </section>
 
   <section id="menu" class="screen" hidden>
-    <div class="bar"><button class="ghost" id="menuBack" type="button" data-i18n="‹ Levels">‹ Levels</button><span class="chip" id="levelChip"></span><span class="stars-total" id="menuStars"></span></div>
+    <div class="bar"><button class="ghost" id="menuBack" type="button" data-i18n="‹ Start">‹ Start</button><span class="chip" id="levelChip"></span><span class="stars-total" id="menuStars"></span></div>
     <div class="scroll"><div class="grid" id="grid"></div></div>
   </section>
 
@@ -789,7 +802,16 @@ Curry powder: 3 shakes|Currypulver: 3× streuen|Curry en poudre : 3 fois|Curry e
 Saffron: 2 shakes|Safran: 2× streuen|Safran : 2 fois|Azafrán: 2 veces|藏红花：撒 2 下
 Pour 600 ml of batter|600 ml Teig eingießen|Verse 600 ml de pâte|Vierte 600 ml de masa|倒入 600 毫升面糊
 Bake the cake|Kuchen backen|Fais cuire le gâteau|Hornea el pastel|烤蛋糕
-Cut the pineapple|Ananas schneiden|Coupe l'ananas|Corta la piña|切菠萝`.split('\n').forEach(l=>{const p=l.split('|');I18N[p[0]]={de:p[1],fr:p[2],es:p[3],zh:p[4]}});
+Cut the pineapple|Ananas schneiden|Coupe l'ananas|Corta la piña|切菠萝
+Restaurant name|Name deines Restaurants|Nom de ton restaurant|Nombre de tu restaurante|餐厅名称
+Difficulty|Schwierigkeit|Difficulté|Dificultad|难度
+This replaces your current game.|Das ersetzt dein aktuelles Spiel.|Cela remplace ta partie en cours.|Esto reemplaza tu partida actual.|这会覆盖你当前的游戏。
+Debug: unlock everything|Debug: alles freischalten|Debug : tout débloquer|Depuración: desbloquear todo|调试：全部解锁
+Back to start|Zum Startbildschirm|Retour à l'accueil|Volver al inicio|返回开始界面
+‹ Start|‹ Start|‹ Accueil|‹ Inicio|‹ 开始
+Progress is saved automatically.|Der Fortschritt wird automatisch gespeichert.|La progression est sauvegardée automatiquement.|El progreso se guarda automáticamente.|进度会自动保存。
+Continue|Weiterspielen|Continuer|Continuar|继续游戏
+Saved: {d}|Gespeichert: {d}|Sauvegardé : {d}|Guardado: {d}|已保存：{d}`.split('\n').forEach(l=>{const p=l.split('|');I18N[p[0]]={de:p[1],fr:p[2],es:p[3],zh:p[4]}});
 let LANG='de',LANG_SET=false;try{const l=localStorage.getItem('pip-lang');if(l){LANG=l;LANG_SET=true}}catch(e){}
 function tr(k,v){let o=LANG!=='en'&&I18N[k]&&I18N[k][LANG]||k;if(v)for(const n in v)o=o.split('{'+n+'}').join(v[n]);return o}
 
@@ -872,7 +894,7 @@ function fs(g,fill,lw=3){
   if(lw){g.lineWidth=lw;g.strokeStyle=INK;g.stroke()}}
 function text(g,s,x,y,size=18,color=INK,align='center',face){g.font=face==='d'?`${size}px ${FD}`:`700 ${size}px ${FB}`;g.fillStyle=color;g.textAlign=align;g.textBaseline='middle';g.fillText(tr(String(s)),x,y,384)}
 /* sprites (generated art); every draw falls back to the vector version until loaded */
-const SPRITES=["bis-clip", "bis-coin", "bis-coins", "bis-counter", "bis-jar", "bis-plant", "bis-sign", "bis-store", "bis-table", "bis-tray", "dish-bolognese", "dish-breakfast", "dish-burger", "dish-calzone", "dish-caprese", "dish-cookies", "dish-crepes", "dish-custompizza", "dish-diavola", "dish-friedrice", "dish-fries", "dish-fruit", "dish-fruittart", "dish-funghi", "dish-garlicbread", "dish-greek", "dish-guac", "dish-hotchoc", "dish-hotdog", "dish-lasagna", "dish-lemonade", "dish-omelette", "dish-pancakes", "dish-pizza", "dish-ramen", "dish-risotto", "dish-salfun", "dish-scramble", "dish-shakshuka", "dish-smoothie", "dish-souffle", "dish-soup", "dish-stirfry", "dish-strudel", "dish-sweetpizza", "dish-vegpizza", "dough-base", "dough-cookie", "dough-palm", "dough-sauced", "dough-shaggy", "dough-sheet", "dough-smooth", "dough-spin", "guest-01a", "guest-01h", "guest-01l", "guest-02a", "guest-02h", "guest-02l", "guest-03a", "guest-03h", "guest-03l", "guest-04a", "guest-04h", "guest-04l", "guest-05a", "guest-05h", "guest-05l", "guest-06a", "guest-06h", "guest-06l", "guest-07a", "guest-07h", "guest-07l", "guest-08a", "guest-08h", "guest-08l", "guest-09a", "guest-09h", "guest-09l", "guest-10a", "guest-10h", "guest-10l", "guest-11a", "guest-11h", "guest-11l", "guest-12a", "guest-12h", "guest-12l", "guest-13a", "guest-13h", "guest-13l", "guest-14a", "guest-14h", "guest-14l", "guest-15a", "guest-15h", "guest-15l", "guest-16a", "guest-16h", "guest-16l", "guest-17a", "guest-17h", "guest-17l", "guest-18a", "guest-18h", "guest-18l", "guest-19a", "guest-19h", "guest-19l", "guest-20a", "guest-20h", "guest-20l", "guest-21a", "guest-21h", "guest-21l", "guest-22a", "guest-22h", "guest-22l", "guest-23a", "guest-23h", "guest-23l", "guest-24a", "guest-24h", "guest-24l", "guest-25a", "guest-25h", "guest-25l", "guest-26a", "guest-26h", "guest-26l", "guest-27a", "guest-27h", "guest-27l", "guest-28a", "guest-28h", "guest-28l", "guest-29a", "guest-29h", "guest-29l", "guest-30a", "guest-30h", "guest-30l", "guest-31a", "guest-31h", "guest-31l", "guest-32a", "guest-32h", "guest-32l", "ing-apple", "ing-avocado", "ing-baguette", "ing-banana", "ing-carrot", "ing-chili", "ing-cucumber", "ing-feta", "ing-garlic", "ing-lemon", "ing-mozzarella", "ing-mushroom", "ing-onion", "ing-pepper", "ing-potato", "ing-salami", "ing-scallion", "ing-strawberry", "ing-tomato", "maya-bust", "maya-cheer", "maya-chop", "maya-idle", "maya-oops", "maya-plate", "maya-stir", "maya-think", "maya-thumbs", "maya-toss", "oven-burner", "oven-closed", "oven-inside", "oven-open", "oven-peel", "oven-wood", "stage-pancake-0", "stage-pancake-1", "stage-pancake-2", "stage-pizza-0", "stage-pizza-1", "stage-pizza-2", "stage-sausage-0", "stage-sausage-1", "stage-sausage-2", "stage-souffle-0", "stage-souffle-1", "stage-souffle-2", "td-bowl", "td-pan", "td-pot", "td-wok", "tool-board", "tool-bowl", "tool-cutter", "tool-jug", "tool-ketchup", "tool-knife", "tool-ladle", "tool-mustard", "tool-pan", "tool-pin", "tool-pitcher", "tool-pot", "tool-ramekin", "tool-shaker", "tool-soy", "tool-spatula", "tool-spoon", "tool-tongs", "tool-tray", "tool-whisk", "top-apple", "top-banana", "top-basil", "top-blue", "top-carrot", "top-chili", "top-cucumber", "top-egg", "top-feta", "top-lemon", "top-mozz", "top-mush", "top-nori", "top-olive", "top-onion", "top-pepper", "top-salami", "top-scallion", "top-strawberry", "top-tomato", "ui-awning", "ui-btnpill", "ui-btnround", "ui-card", "ui-heart", "ui-lock", "ui-medal", "ui-panel", "ui-soundoff", "ui-soundon", "ui-star", "ui-starempty", "ui-toque", "ui-watch"];
+const SPRITES=["bis-clip", "bis-coin", "bis-coins", "bis-counter", "bis-jar", "bis-plant", "bis-sign", "bis-store", "bis-table", "bis-tray", "dish-applepie", "dish-bananabread", "dish-bolognese", "dish-breakfast", "dish-bruschetta", "dish-burger", "dish-calzone", "dish-caprese", "dish-capsal", "dish-choccake", "dish-cookies", "dish-crepes", "dish-curry", "dish-custompizza", "dish-diavola", "dish-friedrice", "dish-fries", "dish-fruit", "dish-fruittart", "dish-funghi", "dish-garlicbread", "dish-gazpacho", "dish-greek", "dish-guac", "dish-hotchoc", "dish-hotdog", "dish-lasagna", "dish-lemonade", "dish-mac", "dish-muffins", "dish-omelette", "dish-padthai", "dish-paella", "dish-pancakes", "dish-pesto", "dish-pizza", "dish-potatosalad", "dish-pumpkinsoup", "dish-quesadilla", "dish-ramen", "dish-ratatouille", "dish-risotto", "dish-salfun", "dish-scramble", "dish-shakshuka", "dish-smoothie", "dish-souffle", "dish-soup", "dish-stirfry", "dish-strudel", "dish-sweetpizza", "dish-tacos", "dish-toasthawaii", "dish-tropical", "dish-vegpizza", "dish-waffles", "dough-base", "dough-cookie", "dough-palm", "dough-sauced", "dough-shaggy", "dough-sheet", "dough-smooth", "dough-spin", "guest-01a", "guest-01h", "guest-01l", "guest-02a", "guest-02h", "guest-02l", "guest-03a", "guest-03h", "guest-03l", "guest-04a", "guest-04h", "guest-04l", "guest-05a", "guest-05h", "guest-05l", "guest-06a", "guest-06h", "guest-06l", "guest-07a", "guest-07h", "guest-07l", "guest-08a", "guest-08h", "guest-08l", "guest-09a", "guest-09h", "guest-09l", "guest-10a", "guest-10h", "guest-10l", "guest-11a", "guest-11h", "guest-11l", "guest-12a", "guest-12h", "guest-12l", "guest-13a", "guest-13h", "guest-13l", "guest-14a", "guest-14h", "guest-14l", "guest-15a", "guest-15h", "guest-15l", "guest-16a", "guest-16h", "guest-16l", "guest-17a", "guest-17h", "guest-17l", "guest-18a", "guest-18h", "guest-18l", "guest-19a", "guest-19h", "guest-19l", "guest-20a", "guest-20h", "guest-20l", "guest-21a", "guest-21h", "guest-21l", "guest-22a", "guest-22h", "guest-22l", "guest-23a", "guest-23h", "guest-23l", "guest-24a", "guest-24h", "guest-24l", "guest-25a", "guest-25h", "guest-25l", "guest-26a", "guest-26h", "guest-26l", "guest-27a", "guest-27h", "guest-27l", "guest-28a", "guest-28h", "guest-28l", "guest-29a", "guest-29h", "guest-29l", "guest-30a", "guest-30h", "guest-30l", "guest-31a", "guest-31h", "guest-31l", "guest-32a", "guest-32h", "guest-32l", "ing-apple", "ing-avocado", "ing-baguette", "ing-banana", "ing-carrot", "ing-cheeseblock", "ing-chili", "ing-cucumber", "ing-eggplant", "ing-feta", "ing-garlic", "ing-grater", "ing-kiwi", "ing-lemon", "ing-mango", "ing-mozzarella", "ing-mushroom", "ing-onion", "ing-pepper", "ing-pineapple", "ing-potato", "ing-pumpkin", "ing-salami", "ing-scallion", "ing-strawberry", "ing-tomato", "ing-zucchini", "maya-bust", "maya-cheer", "maya-chop", "maya-idle", "maya-oops", "maya-plate", "maya-stir", "maya-think", "maya-thumbs", "maya-toss", "oven-burner", "oven-closed", "oven-inside", "oven-open", "oven-peel", "oven-wood", "stage-base-0", "stage-base-1", "stage-base-2", "stage-cake-0", "stage-cake-1", "stage-cake-2", "stage-gratedmelt-0", "stage-gratedmelt-1", "stage-gratedmelt-2", "stage-loaf-0", "stage-loaf-1", "stage-loaf-2", "stage-mac-0", "stage-mac-1", "stage-mac-2", "stage-mozzmelt-0", "stage-mozzmelt-1", "stage-mozzmelt-2", "stage-muffins-0", "stage-muffins-1", "stage-muffins-2", "stage-pancake-0", "stage-pancake-1", "stage-pancake-2", "stage-pie-0", "stage-pie-1", "stage-pie-2", "stage-pizza-0", "stage-pizza-1", "stage-pizza-2", "stage-sausage-0", "stage-sausage-1", "stage-sausage-2", "stage-souffle-0", "stage-souffle-1", "stage-souffle-2", "stage-toast-0", "stage-toast-1", "stage-toast-2", "td-bowl", "td-pan", "td-pot", "td-wok", "tool-board", "tool-bowl", "tool-cutter", "tool-jug", "tool-ketchup", "tool-knife", "tool-ladle", "tool-mustard", "tool-pan", "tool-pin", "tool-pitcher", "tool-pot", "tool-ramekin", "tool-shaker", "tool-soy", "tool-spatula", "tool-spoon", "tool-tongs", "tool-tray", "tool-whisk", "top-apple", "top-banana", "top-basil", "top-blue", "top-blue2", "top-carrot", "top-chili", "top-cucumber", "top-egg", "top-eggplant", "top-feta", "top-grated", "top-kiwi", "top-lemon", "top-mango", "top-mozz", "top-mush", "top-nori", "top-olive", "top-onion", "top-pepper", "top-pesto", "top-pineapple", "top-potato", "top-pumpkin", "top-salami", "top-scallion", "top-strawberry", "top-tomato", "top-zucchini", "ui-awning", "ui-btnpill", "ui-btnround", "ui-card", "ui-heart", "ui-lock", "ui-medal", "ui-panel", "ui-soundoff", "ui-soundon", "ui-star", "ui-starempty", "ui-toque", "ui-watch"];
 const SPR={};let sprT=0;SPRITES.forEach(n=>{const i=new Image();i.decoding='async';i.onload=()=>{clearTimeout(sprT);sprT=setTimeout(()=>window.refreshArt&&refreshArt(),120)};i.src='sprites/'+n+'.webp';SPR[n]=i});
 const TEX={};['tiles','wood','flour','planks'].forEach(n=>{const i=new Image();i.src='sprites/tex-'+n+'.webp';TEX[n]=i});
 const tex=n=>{const i=TEX[n];return i&&i.complete&&i.naturalWidth?i:null};
@@ -1175,7 +1197,8 @@ G.heat=(s,d)=>{
         g.save();rrect(g,76,226,248,208,20);g.clip();const ins=spr('oven-inside');if(ins){const k2=Math.max(248/ins.width,208/ins.height);g.drawImage(ins,200-ins.width*k2/2,330-ins.height*k2/2,ins.width*k2,ins.height*k2)}g.fillStyle=`rgba(255,140,40,${.16+.08*Math.sin(T*3)})`;g.fillRect(76,226,248,208);
         if(!ins){g.beginPath();for(let x=86;x<=314;x+=12)g.lineTo(x,240+(x/12%2?5:-5));g.lineWidth=3;g.strokeStyle='#FF6A3D';g.stroke();
         g.beginPath();g.moveTo(80,404);g.lineTo(320,404);g.lineWidth=3;g.strokeStyle='#8E97AE';g.stroke()}
-        if(s.item==='pizza'){g.save();g.translate(200,332);g.scale(1,.87);drawPizza(g,0,0,92,'plain',E.lastTops,s.sauce,ck,E.cheese);g.restore()}
+        if(s.art&&spr('stage-'+s.art+'-0')){const im=spr('stage-'+s.art+'-0'),w=s.artW||176,h=w*im.height/im.width,y0=s.artTop?336-h/2:404-h;drawStage3(g,'stage-'+s.art,200-w/2,y0,w,h,ck)}
+        else if(s.item==='pizza'){g.save();g.translate(200,332);g.scale(1,.87);drawPizza(g,0,0,92,'plain',E.lastTops,s.sauce,ck,E.cheese);g.restore()}
         else if(s.item==='strudel'||s.item==='bread'){rrect(g,116,356,168,48,24);fs(g,c);g.strokeStyle='rgba(59,34,24,.4)';g.lineWidth=2.5;for(let x=150;x<=250;x+=34){g.beginPath();g.moveTo(x-6,362);g.lineTo(x+6,398);g.stroke()}}
         else if(s.item==='cake'){const h2=24+Math.min(ck,1.1)*14;rrect(g,126,398-h2,148,h2,10);fs(g,c);rrect(g,118,394,164,12,5);fs(g,'#9AA3BC',2)}
         else if(s.item==='muffins'){[140,200,260].forEach(x=>{g.beginPath();g.moveTo(x-24,372);g.lineTo(x+24,372);g.lineTo(x+18,400);g.lineTo(x-18,400);g.closePath();fs(g,'#EF4F3A',2.5);g.beginPath();g.ellipse(x,372,28,10+Math.min(ck,1.1)*12,0,Math.PI,0);g.closePath();fs(g,c);g.fillStyle='#3E4FA0';[[-10,-6],[6,-10],[12,-2]].forEach(([a,b])=>{ell(g,x+a,366+b,3,3);g.fill()})})}
@@ -1280,8 +1303,10 @@ const TOP={
   blue:{c:'#3E4FA0',name:'blueberry',draw(g,x,y){[[-6,-4],[6,-3],[0,6]].forEach(([a,b])=>{ell(g,x+a,y+b,7,7);fs(g,'#3E4FA0',2)})}},
   mush:{c:'#F1E3CF',name:'mushroom',draw(g,x,y){rrect(g,x-6,y-2,12,16,4);fs(g,'#F1E3CF',2);g.beginPath();g.ellipse(x,y,18,13,0,Math.PI,0);g.closePath();fs(g,'#B98A5E',2.5)}}
 };
-const TOPSPR={pepstrip:'top-pepper',oniond:'top-onion',cuke:'top-cucumber',tomslice:'top-tomato',mozz:'top-mozz',basil:'top-basil',egg:'top-egg',nori:'top-nori',scal:'top-scallion',mush:'top-mush',salami:'top-salami',chili:'top-chili',feta:'top-feta',olive:'top-olive',berry:'top-strawberry',banslice:'top-banana',blue:'top-blue'};
-for(const k in TOP){const vec=TOP[k].draw,sn=TOPSPR[k];TOP[k].draw=(g,x,y,sz=46,ck=0)=>{const im=spr(sn);if(!im){vec(g,x,y);return}const q=sz/Math.max(im.width,im.height),w=im.width*q,h=im.height*q;drawStaged(g,sn,x-w/2,y-h/2,w,h,ck)}}
+const TOPSPR={grated:'top-grated',pepstrip:'top-pepper',oniond:'top-onion',cuke:'top-cucumber',tomslice:'top-tomato',mozz:'top-mozz',basil:'top-basil',egg:'top-egg',nori:'top-nori',scal:'top-scallion',mush:'top-mush',salami:'top-salami',chili:'top-chili',feta:'top-feta',olive:'top-olive',berry:'top-strawberry',banslice:'top-banana',blue:'top-blue'};
+for(const k in TOP){const vec=TOP[k].draw,sn=TOPSPR[k];TOP[k].draw=(g,x,y,sz=46,ck=0)=>{const im=spr(sn);if(!im){vec(g,x,y);return}const q=sz/Math.max(im.width,im.height),w=im.width*q,h=im.height*q;
+  if(k==='mozz'&&ck>.02&&spr('stage-mozzmelt-1')){const m1=spr('stage-mozzmelt-1'),m2=spr('stage-mozzmelt-2'),mw=sz*1.3,mh=mw*m1.height/m1.width;g.globalAlpha=Math.max(0,1-ck*1.4);drawSpr(g,im,x-w/2,y-h/2,w,h);g.globalAlpha=Math.min(1,ck*1.2);g.drawImage(m1,x-mw/2,y-mh/2,mw,mh);if(ck>1&&m2){g.globalAlpha=Math.min(1,(ck-1)/.6);g.drawImage(m2,x-mw/2,y-mh/2,mw,mh)}g.globalAlpha=1;return}
+  drawStaged(g,sn,x-w/2,y-h/2,w,h,ck)}}
 const LAYOUTS={
   pizza:[[200,215,'mozz'],[135,165,'mozz'],[265,165,'mozz'],[140,275,'mozz'],[262,278,'mozz'],[200,128,'basil'],[112,220,'basil'],[288,220,'basil'],[200,305,'basil']],
   diavola:[[200,128,'salami'],[275,165,'salami'],[120,212,'salami'],[286,248,'salami'],[196,305,'salami'],[200,215,'mozz'],[140,160,'mozz'],[255,290,'mozz'],[130,280,'mozz'],[245,215,'chili'],[160,240,'chili'],[230,170,'chili']],
@@ -1405,8 +1430,10 @@ function drawShreds(g,list,cx,cy,q,k,ck){if(!list||!list.length)return;const col
   g.lineCap='round';for(const pass of [0,1]){g.beginPath();for(const o of list){const x=cx+o.x*q,y=cy+o.y*q,dx=Math.cos(o.a)*o.l*k/2,dy=Math.sin(o.a)*o.l*k/2;g.moveTo(x-dx,y-dy);g.lineTo(x+dx,y+dy)}
     g.lineWidth=(pass?3.2:5.2)*k*melt;g.strokeStyle=pass?col:'rgba(160,110,30,.45)';g.stroke()}g.lineCap='butt'}
 function drawPizza(g,cx,cy,R,style,tops,sauce,ck=1,shreds){const k=R/150,q=R*.84,crust=ck<=1?mix('#F3D9A4','#D99A3A',ck):mix('#D99A3A','#3B2416',(ck-1)/.6);
+  const bart=(!sauce||sauce==='#D93A2B'||sauce==='#C8321F')&&spr('stage-base-0');
+  if(bart){const w=R*2.06,h=w*bart.height/bart.width;drawStage3(g,'stage-base',cx-w/2,cy-h/2,w,h,ck)}else{
   ell(g,cx,cy,R,R);fs(g,crust);g.globalAlpha=clamp(ck,0,1);g.fillStyle='#8A5226';[[.92,.3],[.9,1.9],[.93,3.4],[.91,4.6],[.9,5.6]].forEach(([r,a])=>{ell(g,cx+Math.cos(a)*R*r,cy+Math.sin(a)*R*r,7*k,4*k,a);g.fill()});
-  g.globalAlpha=1;ell(g,cx,cy,q,q);fs(g,ck>1?mix(sauce||'#C8321F','#3B2416',(ck-1)/.9):(sauce||'#C8321F'),2);
+  g.globalAlpha=1;ell(g,cx,cy,q,q);fs(g,ck>1?mix(sauce||'#C8321F','#3B2416',(ck-1)/.9):(sauce||'#C8321F'),2)}
   const chz=ck<=1?mix('#FFFFFF','#FFF1C9',ck):mix('#FFF1C9','#5A3A1E',(ck-1)/.6);
   if(shreds&&shreds.length)drawShreds(g,shreds,cx,cy,q,k,ck);
   else if(style!=='sweet')[[0,0],[-.5,-.4],[.5,-.38],[-.45,.48],[.5,.5],[0,-.7],[-.75,.05],[.75,0],[0,.72]].forEach(([x,y],i)=>{ell(g,cx+x*q,cy+y*q,22*k,18*k,i);g.fillStyle=chz;g.fill();if(ck<.35)return;ell(g,cx+x*q+5*k,cy+y*q-4*k,6*k,4*k);g.fillStyle='#F2C25A';g.fill()});
@@ -1501,11 +1528,12 @@ G.grate=(s,d)=>{const gx=200,auto=d.id!=='head',btn=auto?null:{x:130,y:432,w:140
       ell(g,200,414,124,34);fs(g,'#FFFFFF');ell(g,200,410,100,24);fs(g,'#EAF1F5',2);
       g.save();g.beginPath();g.ellipse(200,410,100,24,0,0,Math.PI*2);g.clip();drawShreds(g,shreds.filter(p=>p.land).map(p=>({x:p.x,y:p.y,a:p.a,l:p.l})),0,0,1,1,0);g.restore();
       drawShreds(g,shreds.filter(p=>!p.land).map(p=>({x:p.x,y:p.y,a:p.a+1.4,l:p.l})),0,0,1,1,0);
-      rrect(g,170,92,60,34,12);fs(g,'#EF4F3A');
+      const grt=spr('ing-grater'),cbk=spr('ing-cheeseblock');
+      if(grt){const gh=270,gw=gh*grt.width/grt.height;drawSpr(g,grt,200-gw/2,86,gw,gh)}else{rrect(g,170,92,60,34,12);fs(g,'#EF4F3A');
       g.beginPath();g.moveTo(140,126);g.lineTo(260,126);g.lineTo(282,348);g.lineTo(118,348);g.closePath();fs(g,'#DCE4EC');
       g.fillStyle='#8E97AE';for(let y=146;y<=330;y+=17){const t=(y-126)/222,w2=60+22*t;for(let x=-w2+12;x<=w2-12;x+=17){ell(g,200+x+((y/17)%2?8:0),y,4.5,2.6);g.fill()}}
-      g.fillStyle='rgba(255,255,255,.5)';g.fillRect(150,132,8,200);
-      const sc=Math.max(.35,1-prog*.6),bw=96*sc,bh=64*Math.max(.5,1-prog*.4);rrect(g,gx-bw/2,by-bh/2,bw,bh,8);fs(g,'#F7D35C');g.fillStyle='#E8B93A';[[-.25,-.2],[.2,.15],[-.05,.25],[.3,-.25]].forEach(([a,b2])=>{ell(g,gx+a*bw,by+b2*bh,4*sc+1,3*sc+1);g.fill()});
+      g.fillStyle='rgba(255,255,255,.5)';g.fillRect(150,132,8,200)}
+      const sc=Math.max(.35,1-prog*.6),bw=96*sc,bh=64*Math.max(.5,1-prog*.4);if(cbk){const w=120*sc,h=w*cbk.height/cbk.width*Math.max(.6,1-prog*.3);drawSpr(g,cbk,gx-w/2,by-h/2,w,h)}else{rrect(g,gx-bw/2,by-bh/2,bw,bh,8);fs(g,'#F7D35C');g.fillStyle='#E8B93A';[[-.25,-.2],[.2,.15],[-.05,.25],[.3,-.25]].forEach(([a,b2])=>{ell(g,gx+a*bw,by+b2*bh,4*sc+1,3*sc+1);g.fill()})}
       rrect(g,334,126,24,222,12);fs(g,'#FFFFFF',2.5);const fh=Math.min(prog/1.3,1)*218;g.save();rrect(g,334,126,24,222,12);g.clip();g.fillStyle=prog>1.15?'#EF4F3A':'#FFC93C';g.fillRect(334,348-fh,24,fh);g.restore();
       const ty=348-218/1.3;g.beginPath();g.moveTo(326,ty);g.lineTo(366,ty);g.lineWidth=3;g.strokeStyle=INK;g.stroke();
       if(btn&&fin<0)btnDraw(g,btn,'Done');
@@ -1842,12 +1870,12 @@ const RECIPES=[
   {id:'toasthawaii',name:'Toast Hawaii',unlock:8,dish:{v:'plate',s:'log',c:'#E0A045',b:['#FFE14D','#FFFDF4']},steps:[
     {g:'chop',item:'pineapple',cuts:4,t:'Cut the pineapple'},
     {g:'grate',t:'Grate the cheese'},
-    {g:'heat',mode:'oven',item:'bread',temp:'200 °C',raw:'#F3D9A4',gold:'#E0A045',burnt:'#4A2E18',t:'Toast it golden'}]},
+    {g:'heat',mode:'oven',art:'toast',artTop:1,artW:150,item:'bread',temp:'200 °C',raw:'#F3D9A4',gold:'#E0A045',burnt:'#4A2E18',t:'Toast it golden'}]},
   {id:'bananabread',name:'Banana Bread',unlock:9,dish:{v:'plate',s:'log',c:'#B8743A',b:['#FFF1A6']},steps:[
     {g:'chop',item:'banana',cuts:5,t:'Slice the banana'},
     {g:'crack',n:2,t:'Crack 2 eggs'},
     {g:'stir',turns:4,colors:['#FFF1A6','#F6E7B8','#D99A3A'],base:'#E8C98A',pieces:['top-banana'],t:'Mix the batter'},
-    {g:'heat',mode:'oven',item:'bread',temp:'180 °C',raw:'#F3D9A4',gold:'#B8743A',burnt:'#3B2416',t:'Bake until golden'}]},
+    {g:'heat',mode:'oven',art:'loaf',item:'bread',temp:'180 °C',raw:'#F3D9A4',gold:'#B8743A',burnt:'#3B2416',t:'Bake until golden'}]},
   {id:'pumpkinsoup',name:'Pumpkin Soup',unlock:9,dish:{v:'bowl',c:'#F08A3A',b:['#FFFFFF']},steps:[
     {g:'chop',item:'pumpkin',cuts:5,t:'Cut the pumpkin'},
     {g:'chop',item:'onion',cuts:3,t:'Chop the onion'},
@@ -1865,7 +1893,7 @@ const RECIPES=[
     {g:'pour',target:.5,color:'#FFFFFF',t:'Pour 500 ml of milk'},
     {g:'stir',turns:3,colors:['#FFFFFF','#F6E7B8'],base:'#F3DFA2',t:'Mix the batter'},
     {g:'season',n:3,color:'#3E4FA0',food:'#F3DFA2',t:'Blueberries: 3 handfuls'},
-    {g:'heat',mode:'oven',item:'muffins',temp:'180 °C',raw:'#F3D9A4',gold:'#C98B4E',burnt:'#3B2416',t:'Bake the muffins'}]},
+    {g:'heat',mode:'oven',art:'muffins',item:'muffins',temp:'180 °C',raw:'#F3D9A4',gold:'#C98B4E',burnt:'#3B2416',t:'Bake the muffins'}]},
   {id:'pesto',name:'Pasta Pesto',unlock:15,dish:{v:'plate',s:'pasta',c:'#F6D98A',b:['#5FA64A']},steps:[
     {g:'chop',item:'garlic',cuts:3,t:'Chop the garlic'},
     {g:'stir',turns:4,fast:true,colors:['#2F8F5B','#C9B23A','#FFFFFF'],base:'#5FA64A',pieces:['top-basil'],t:'Mix the pesto'},
@@ -1890,7 +1918,7 @@ const RECIPES=[
     {g:'pour',target:.5,color:'#FFFFFF',t:'Pour 500 ml of milk'},
     {g:'grate',t:'Grate the cheese'},
     {g:'stir',turns:3,colors:['#FFFFFF','#F2C84B','#F7EBC6'],base:'#F2C84B',t:'Stir in the cheese'},
-    {g:'heat',mode:'oven',item:'dish',temp:'200 °C',raw:'#F3E3B0',gold:'#E0A045',burnt:'#4A2E18',t:'Bake until bubbling'}]},
+    {g:'heat',mode:'oven',art:'mac',item:'dish',temp:'200 °C',raw:'#F3E3B0',gold:'#E0A045',burnt:'#4A2E18',t:'Bake until bubbling'}]},
   {id:'tacos',name:'Tacos',unlock:24,dish:{v:'plate',s:'half',c:'#F2C26A',b:['#EF4F3A','#7CC576']},steps:[
     {g:'chop',item:'tomato',cuts:4,t:'Chop the tomato'},
     {g:'chop',item:'onion',cuts:3,t:'Chop the onion'},
@@ -1902,7 +1930,7 @@ const RECIPES=[
     {g:'season',n:5,color:'#8A4B22',food:'#F3E3B0',t:'Cinnamon: 5 shakes'},
     {g:'knead',n:4,t:'Make the pastry'},
     {g:'roll',r:120,cm:26,t:'Roll the pastry'},
-    {g:'heat',mode:'oven',item:'tart',temp:'180 °C',raw:'#F3D9A4',gold:'#E0A045',burnt:'#4A2E18',t:'Bake until golden'}]},
+    {g:'heat',mode:'oven',art:'pie',artTop:1,artW:168,item:'tart',temp:'180 °C',raw:'#F3D9A4',gold:'#E0A045',burnt:'#4A2E18',t:'Bake until golden'}]},
   {id:'curry',name:'Vegetable Curry',unlock:28,dish:{v:'bowl',c:'#F2B33D',b:['#F08A3A','#E8C08E','#7CC576']},steps:[
     {g:'chop',item:'onion',cuts:4,t:'Chop the onion'},
     {g:'chop',item:'potato',cuts:4,t:'Cut the potatoes'},
@@ -1916,7 +1944,7 @@ const RECIPES=[
     {g:'season',n:4,color:'#6B3A1E',food:'#F4EEE6',t:'Cocoa: 4 spoonfuls'},
     {g:'stir',turns:4,colors:['#6B3A1E','#F6E7B8','#FFFFFF'],base:'#6B3A1E',t:'Mix the batter'},
     {g:'pour',target:.6,color:'#6B3A1E',t:'Pour 600 ml of batter'},
-    {g:'heat',mode:'oven',item:'cake',temp:'175 °C',raw:'#8A5A3A',gold:'#5A3A1E',burnt:'#1E120A',t:'Bake the cake'}]},
+    {g:'heat',mode:'oven',art:'cake',item:'cake',temp:'175 °C',raw:'#8A5A3A',gold:'#5A3A1E',burnt:'#1E120A',t:'Bake the cake'}]},
   {id:'padthai',name:'Pad Thai',unlock:34,dish:{v:'plate',s:'pasta',c:'#F2D58A',b:['#F08A3A','#7CC576']},steps:[
     {g:'heat',mode:'pot',item:'pasta',min:6,raw:'#F7EBC6',gold:'#F2D58A',burnt:'#B89A55',t:'Cook the noodles'},
     {g:'crack',n:1,t:'Crack an egg'},
@@ -1999,8 +2027,23 @@ const unlocked=r=>DEBUG||r.unlock<=totalStars(),bistroOpen=()=>DEBUG||totalStars
 const tagOf=s=>s.g==='stir'?(s.style==='spread'?'spread':s.whisk?'whisk':'stir'):s.g==='heat'?({pan:'fry',oven:'bake',pot:'boil'}[s.mode]):s.g==='toppings'?'top':s.g;
 const starsHTML=n=>[0,1,2].map(i=>`<span class="${i<n?'star':'off'}">★</span>`).join('');
 
-function show(id){['home','menu','cook','done','bistro','settings','carte'].forEach(s=>$('#'+s).hidden=s!==id);setMusic(id==='bistro'||id==='carte'||(id==='cook'&&E.service)?'bistro':'kitchen');if(id!=='cook')stopLoop();if(id!=='bistro')stopBis()}
-function renderHome(){$('#homeStars').innerHTML=`<span class="star">★</span> `+tr('{n} of {m} stars earned',{n:totalStars(),m:MAX_STARS})}
+function show(id){$('#gear').hidden=id==='settings';['start','menu','cook','done','bistro','settings','carte'].forEach(s=>$('#'+s).hidden=s!==id);setMusic(id==='bistro'||id==='carte'||(id==='cook'&&E.service)?'bistro':'kitchen');if(id!=='cook')stopLoop();if(id!=='bistro')stopBis()}
+/* profile: restaurant name + difficulty, chosen when starting a new game */
+const PROFILE_KEY='pip-profile';let PROFILE=null;try{PROFILE=JSON.parse(localStorage.getItem(PROFILE_KEY)||'null')}catch(e){}
+if(PROFILE&&LV[PROFILE.level])diff=LV[PROFILE.level];
+const saveProfile=()=>{PROFILE=PROFILE||{};PROFILE.level=diff.id;try{localStorage.setItem(PROFILE_KEY,JSON.stringify(PROFILE))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const restaurantName=()=>(PROFILE&&PROFILE.name)||tr("Maya's Restaurant");
+const hasGame=()=>!!PROFILE||totalStars()>0||B.day>1||B.coins>0;
+const SAVE_KEY='pip-save-v1';const readSave=()=>{try{return JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){return null}};
+const starsIn=pg=>RECIPES.reduce((t,r)=>{const o=pg&&pg[r.id]||{};return t+Math.max(o.little||0,o.home||0,o.head||0)},0);
+const when=t=>new Date(t).toLocaleString(LANG==='zh'?'zh-CN':LANG,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function saveSummary(sv){const nm=sv.profile&&sv.profile.name||tr("Maya's Restaurant"),cents=sv.bistro&&sv.bistro.cents?sv.bistro.coins:(sv.bistro&&sv.bistro.coins||0)*100;
+  return[nm,starsIn(sv.prog)+' ★',tr('Day {n}',{n:sv.bistro&&sv.bistro.day||1}),money(cents),when(sv.t)].join(' · ')}
+function renderHome(){$('#startName').textContent=restaurantName();const g=hasGame(),sv=readSave();
+  $('#contBtn').hidden=!g;$('#slotInfo').hidden=!g;$('#slotInfo').textContent=g?[tr(diff.name),totalStars()+' ★',tr('Day {n}',{n:B.day}),money(B.coins)].join(' · '):'';
+  $('#loadBtn').hidden=!sv;$('#loadInfo').hidden=!sv;$('#loadInfo').textContent=sv?saveSummary(sv):'';
+  $('#newBtn').className=g||sv?'btn alt':'btn'}
 function renderMenu(){
   const tot=totalStars();$('#levelChip').textContent=tr(diff.name);$('#menuStars').innerHTML=`<span class="star">★</span> ${tot}`;
   const grid=$('#grid');grid.innerHTML='';
@@ -2009,7 +2052,7 @@ function renderMenu(){
     b.innerHTML=`<canvas></canvas><span class="cname">${tr(r.name)}</span><span class="cmeta">${tr('{n} steps',{n:st.length})} · ${tags.map(x=>tr(x)).join(' · ')}</span>${locked?`<span class="lock"><img src="sprites/ui-lock.webp" alt="">${tr('Unlocks at {n} ★',{n:r.unlock})}</span>`:`<span class="cstars">${starsHTML(best(r.id,diff.id))}</span>`}`;
     paintThumb(b.querySelector('canvas'),r.id,76);b.addEventListener('click',()=>{ac();sfx.tap();startRecipe(r)});grid.appendChild(b)});
   const bi=document.createElement('div');bi.className='bistro';const open=bistroOpen();
-  bi.innerHTML=`<div class="awning"></div><div class="bistro-body"><img class="store" src="sprites/bis-store.webp" alt=""><h3>${tr("Maya's Bistro")}</h3><p>${tr('Guests come in, order from your recipes and wait while you cook. Serve them quickly and well for bigger tips.')}</p>${open?`<small>${tr('Day {n}',{n:B.day})} · ${tr('{n} earned so far',{n:money(B.coins)})}</small><button class="btn" id="openBistro" type="button">${tr(B.on?'Back to service':'Open the bistro')}</button>`:`<div class="meter"><i style="width:${Math.min(100,tot/BISTRO_AT*100)}%"></i></div><small>${tr('{a} of {b} ★ to open the doors',{a:tot,b:BISTRO_AT})}</small>`}</div>`;
+  bi.innerHTML=`<div class="awning"></div><div class="bistro-body"><img class="store" src="sprites/bis-store.webp" alt=""><h3>${esc(restaurantName())}</h3><p>${tr('Guests come in, order from your recipes and wait while you cook. Serve them quickly and well for bigger tips.')}</p>${open?`<small>${tr('Day {n}',{n:B.day})} · ${tr('{n} earned so far',{n:money(B.coins)})}</small><button class="btn" id="openBistro" type="button">${tr(B.on?'Back to service':'Open the bistro')}</button>`:`<div class="meter"><i style="width:${Math.min(100,tot/BISTRO_AT*100)}%"></i></div><small>${tr('{a} of {b} ★ to open the doors',{a:tot,b:BISTRO_AT})}</small>`}</div>`;
   grid.appendChild(bi);if(open)bi.querySelector('#openBistro').onclick=()=>{ac();sfx.tap();openBistro()}}
 
 /* ============ cooking engine ============ */
@@ -2138,7 +2181,7 @@ function svcUI(){const c=E.service;if(!c)return;const w=B.seats.filter(x=>x&&(x.
   $('#svcText').textContent=tr('For {n}',{n:c.name})+(w?' · '+tr('{n} waiting',{n:w}):'');$('#svcFill').style.transform=`scaleX(${c.pat})`;$('#svcFill').parentNode.className='pat'+(c.pat<.3?' low':c.pat<.6?' mid':'')}
 function bisOverlay(kind,info){const card=$('#bisCard');$('#bisOverlay').hidden=false;
   card.innerHTML=kind==='start'
-    ?`<div class="pip-sm">${mayaHTML('plate')}</div><p class="stepno">${tr("Maya's Bistro")}</p><h3>${tr('Day {n}',{n:B.day})}</h3><p class="hint">${tr('{n} guests are coming. Take each order, cook the dish, and serve it before they run out of patience.',{n:guestsFor(B.day)})}</p><p class="hint" style="font-weight:800">${tr('{n} dishes on the menu',{n:menuPool().length})}</p><button class="btn" id="bisGo" type="button">${tr('Open the doors')}</button><button class="ghost" id="bisEdit" type="button">${tr('Edit menu')}</button>`
+    ?`<div class="pip-sm">${mayaHTML('plate')}</div><p class="stepno">${esc(restaurantName())}</p><h3>${tr('Day {n}',{n:B.day})}</h3><p class="hint">${tr('{n} guests are coming. Take each order, cook the dish, and serve it before they run out of patience.',{n:guestsFor(B.day)})}</p><p class="hint" style="font-weight:800">${tr('{n} dishes on the menu',{n:menuPool().length})}</p><button class="btn" id="bisGo" type="button">${tr('Open the doors')}</button><button class="ghost" id="bisEdit" type="button">${tr('Edit menu')}</button>`
     :`<div class="pip-sm">${mayaHTML(info.st>=2?'cheer':'think')}</div><p class="stepno">${tr('Day {n} closed',{n:info.day})}</p><div class="big-stars">${[0,1,2].map(i=>`<span class="${i<info.st?'star':'off'}" style="animation-delay:${.1+i*.18}s">★</span>`).join('')}</div><p class="hint">${tr('Served {a} of {b} guests',{a:info.served,b:info.total})}${info.lost?tr(', {n} left early',{n:info.lost}):''}. ${tr('You earned {n}.',{n:money(info.earned)})}</p><button class="btn" id="bisGo" type="button">${tr('Start day {n}',{n:B.day})}</button>`;
   $('#bisGo').onclick=()=>{ac();sfx.tap();startDay()};const be=$('#bisEdit');if(be)be.onclick=()=>{sfx.tap();openCarte()}}
 function renderCarte(){const all=menuable(),grid=$('#carteGrid');grid.innerHTML='';
@@ -2162,8 +2205,9 @@ function backToBistro(){renderBistro();show('bistro');startBis()}
 function openBistro(){backToBistro();if(!B.on)bisOverlay('start')}
 
 /* ============ wiring ============ */
-document.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>{diff=LV[b.dataset.level];ac();sfx.tap();renderMenu();show('menu')}));
-$('#menuBack').onclick=()=>{renderHome();show('home')};
+let NEWLV='little';const newLvUI=()=>document.querySelectorAll('#newLevels .level').forEach(b=>{b.classList.toggle('sel',b.dataset.level===NEWLV);b.setAttribute('aria-pressed',b.dataset.level===NEWLV)});
+document.querySelectorAll('#newLevels .level').forEach(b=>b.addEventListener('click',()=>{NEWLV=b.dataset.level;ac();sfx.tap();newLvUI()}));
+$('#menuBack').onclick=()=>{sfx.tap();renderHome();show('start')};
 $('#quitBtn').onclick=()=>{E.state='idle';if(E.service){const c=E.service;E.service=null;if(B.seats.includes(c))c.state='wait';backToBistro();return}renderMenu();show('menu')};
 $('#goBtn').onclick=begin;
 $('#againBtn').onclick=()=>startRecipe(E.r);
@@ -2171,25 +2215,33 @@ $('#toMenuBtn').onclick=()=>{renderMenu();show('menu')};
 function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=tr(el.dataset.i18n)});document.documentElement.lang=LANG==='zh'?'zh-CN':LANG;document.title=tr("Maya's Restaurant")}
 function renderSettings(){const box=$('#langs');box.innerHTML='';
   LANGS.forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.className='lang'+(id===LANG?' on':'');b.innerHTML=`${name}<small>${id.toUpperCase()}</small>`;
-    b.onclick=()=>{LANG=id;LANG_SET=true;try{localStorage.setItem('pip-lang',id)}catch(e){}sfx.tap();applyI18n();renderSettings();slotUI()};box.appendChild(b)});
-  $('#musVol').value=Math.round(MUSV*100);$('#sfxVol').value=Math.round(SFXV*100);$('#musVal').textContent=Math.round(MUSV*100)+'%';nowPlayingUI();$('#sfxVal').textContent=Math.round(SFXV*100)+'%'}
-function openSettings(){renderSettings();slotUI();$('#newConfirm').hidden=true;$('#saveBtns').hidden=false;$('#saveMsg').hidden=true;show('settings')}
-const leaveSettings=()=>{try{localStorage.setItem('pip-lang',LANG)}catch(e){}LANG_SET=true;ac();sfx.tap();renderHome();show('home')};
-$('#setBtn').onclick=()=>{sfx.tap();openSettings()};$('#setBack').onclick=leaveSettings;
-/* save / load / new game: one save slot in this browser */
-const SAVE_KEY='pip-save-v1';
-const readSave=()=>{try{return JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){return null}};
-const starsIn=pg=>RECIPES.reduce((t,r)=>{const o=pg&&pg[r.id]||{};return t+Math.max(o.little||0,o.home||0,o.head||0)},0);
-function slotUI(){const sv=readSave();$('#loadBtn').disabled=!sv;
-  $('#slotInfo').textContent=sv?tr('Saved game: {d} · {n} ★ · Day {b}',{d:new Date(sv.t).toLocaleString(LANG==='zh'?'zh-CN':LANG,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),n:starsIn(sv.prog),b:sv.bistro.day}):tr('No saved game yet.')}
-function flash(msg){const m=$('#saveMsg');m.textContent=msg;m.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(()=>{m.hidden=true},2600)}
+    b.onclick=()=>{LANG=id;LANG_SET=true;try{localStorage.setItem('pip-lang',id)}catch(e){}sfx.tap();applyI18n();renderSettings()};box.appendChild(b)});
+  const dv=$('#diffs');dv.innerHTML='';[['little','Ages 3–6'],['home','Ages 7–11'],['head','Ages 12+']].forEach(([id,age])=>{const b=document.createElement('button');b.type='button';b.className='lang'+(diff.id===id?' on':'');b.innerHTML=`${tr(LV[id].name)}<small>${tr(age).toUpperCase()}</small>`;
+    b.onclick=()=>{diff=LV[id];saveProfile();sfx.tap();renderSettings()};dv.appendChild(b)});
+  const d=$('#dbgTgl');d.classList.toggle('on',DEBUG);d.innerHTML=`${tr('Debug: unlock everything')}<small>${tr(DEBUG?'On':'Off').toUpperCase()}</small>`;
+  $('#musVol').value=Math.round(MUSV*100);$('#sfxVol').value=Math.round(SFXV*100);$('#musVal').textContent=Math.round(MUSV*100)+'%';$('#sfxVal').textContent=Math.round(SFXV*100)+'%';nowPlayingUI();saveInfoUI();$('#saveMsg').hidden=true}
+let SET_PREV='start';
+function openSettings(){const cur=['start','menu','cook','done','bistro','carte'].find(id=>!$('#'+id).hidden);if(cur)SET_PREV=cur;renderSettings();show('settings')}
+function closeSettings(){ac();sfx.tap();const p=SET_PREV||'start';
+  if(p==='bistro'){backToBistro();return}if(p==='carte'){renderCarte();show('carte');return}
+  if(p==='menu')renderMenu();if(p==='start')renderHome();show(p);if(p==='cook'){fit();startLoop()}}
+$('#gear').onclick=()=>{ac();sfx.tap();openSettings()};$('#setBack').onclick=closeSettings;
+$('#toStart').onclick=()=>{ac();sfx.tap();resetRun();renderHome();show('start')};
+$('#dbgTgl').onclick=()=>{DEBUG=!DEBUG;try{localStorage.setItem('pip-debug',DEBUG?'1':'0')}catch(e){}sfx.tap();renderSettings()};
+/* start screen: load (continue the autosaved game) or start a new one */
 function resetRun(){B.on=false;B.seats=[null,null,null];B.toSpawn=0;E.service=null;E.state='idle'}
-$('#saveBtn').onclick=()=>{ac();try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,t:Date.now(),level:diff.id,prog,bistro:{cents:1,day:B.day,coins:B.coins,menu:B.menu,prices:B.prices}}));sfx.good();flash(tr('Game saved!'))}catch(e){sfx.bad();flash(tr('Could not save in this browser.'))}slotUI()};
-$('#loadBtn').onclick=()=>{const sv=readSave();if(!sv)return;ac();resetRun();prog=JSON.parse(JSON.stringify(sv.prog||{}));save();B.day=sv.bistro&&sv.bistro.day||1;B.coins=sv.bistro&&sv.bistro.coins||0;B.menu=sv.bistro&&Array.isArray(sv.bistro.menu)?sv.bistro.menu:null;B.prices=sv.bistro&&sv.bistro.prices||{};if(!(sv.bistro&&sv.bistro.cents)){B.coins*=100;B.prices={}}saveB();if(LV[sv.level])diff=LV[sv.level];
-  sfx.perfect();flash(tr('Game loaded!'));setTimeout(()=>{renderHome();show('home')},700)};
-const doNew=()=>{ac();resetRun();prog={};save();B.day=1;B.coins=0;B.menu=null;B.prices={};saveB();diff=LV.little;$('#newConfirm').hidden=true;$('#saveBtns').hidden=false;sfx.tap();renderHome();show('home')};
-$('#newBtn').onclick=()=>{if(totalStars()===0&&B.coins===0&&B.day===1){doNew();return}sfx.tap();$('#saveBtns').hidden=true;$('#newConfirm').hidden=false;try{$('#newNo').focus()}catch(e){}};
-$('#newYes').onclick=doNew;$('#newNo').onclick=()=>{sfx.tap();$('#newConfirm').hidden=true;$('#saveBtns').hidden=false};
+$('#contBtn').onclick=()=>{ac();sfx.perfect();renderMenu();show('menu')};
+$('#loadBtn').onclick=()=>{const sv=readSave();if(!sv)return;ac();resetRun();prog=JSON.parse(JSON.stringify(sv.prog||{}));save();
+  const bs=sv.bistro||{};B.day=bs.day||1;B.coins=bs.cents?(bs.coins||0):(bs.coins||0)*100;B.menu=Array.isArray(bs.menu)?bs.menu:null;B.prices=bs.cents&&bs.prices||{};saveB();
+  if(LV[sv.level])diff=LV[sv.level];PROFILE={name:sv.profile&&sv.profile.name||'',level:diff.id};saveProfile();sfx.perfect();renderMenu();show('menu')};
+function saveInfoUI(){const sv=readSave();$('#saveInfo').textContent=sv?tr('Saved: {d}',{d:saveSummary(sv)}):tr('No saved game yet.')}
+function flash(msg){const m=$('#saveMsg');m.textContent=msg;m.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(()=>{m.hidden=true},2600)}
+$('#saveBtn').onclick=()=>{ac();try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:2,t:Date.now(),level:diff.id,profile:{name:PROFILE&&PROFILE.name||''},prog,bistro:{cents:1,day:B.day,coins:B.coins,menu:B.menu,prices:B.prices}}));sfx.good();flash(tr('Game saved!'))}catch(e){sfx.bad();flash(tr('Could not save in this browser.'))}saveInfoUI()};
+$('#newBtn').onclick=()=>{ac();sfx.tap();$('#startBtns').hidden=true;$('#newForm').hidden=false;$('#newName').value='';$('#newName').placeholder=tr("Maya's Restaurant");NEWLV=diff.id;newLvUI();$('#newWarn').hidden=!hasGame();$('#newWarn').textContent=tr('This replaces your current game.');try{$('#newName').focus({preventScroll:true})}catch(e){}};
+$('#newCancel').onclick=()=>{sfx.tap();$('#newForm').hidden=true;$('#startBtns').hidden=false};
+$('#newForm').addEventListener('submit',e=>{e.preventDefault();ac();resetRun();prog={};save();B.day=1;B.coins=0;B.menu=null;B.prices={};saveB();
+  diff=LV[NEWLV];PROFILE={name:($('#newName').value||'').trim().slice(0,24),level:NEWLV};saveProfile();
+  $('#newForm').hidden=true;$('#startBtns').hidden=false;sfx.perfect();renderMenu();show('menu')});
 $('#musVol').oninput=e=>{MUSV=e.target.value/100;$('#musVal').textContent=e.target.value+'%';try{localStorage.setItem('pip-mus-vol',MUSV)}catch(_){}MUS.unlocked=true;musicUpdate()};
 $('#sfxVol').oninput=e=>{SFXV=e.target.value/100;$('#sfxVal').textContent=e.target.value+'%';try{localStorage.setItem('pip-sfx-vol',SFXV)}catch(_){}};
 $('#sfxVol').onchange=()=>{ac();sfx.good()};
@@ -2198,13 +2250,11 @@ $('#bisBack').onclick=()=>{renderMenu();show('menu')};
 $('#bisMenu').onclick=()=>{sfx.tap();openCarte()};
 $('#carteBack').onclick=()=>{sfx.tap();backToBistro();if(!B.on)bisOverlay('start')};
 $('#carteAll').onclick=()=>{B.menu=null;saveB();sfx.pop();renderCarte()};
-const dbg=$('#dbg'),dbgUI=()=>{dbg.classList.toggle('on',DEBUG);dbg.title=DEBUG?'Debug on: all recipes and the bistro are unlocked':'Debug: unlock all recipes'};dbgUI();
-dbg.onclick=()=>{DEBUG=!DEBUG;try{localStorage.setItem('pip-debug',DEBUG?'1':'0')}catch(e){}dbgUI();sfx.tap();if(!$('#menu').hidden)renderMenu();if(!$('#home').hidden)renderHome()};
 window.addEventListener('resize',()=>{if(!$('#cook').hidden){fit();if(E.g)draw()}});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!$('#menu').hidden)renderMenu()});
 
-window.refreshArt=()=>{if(!$('#menu').hidden)renderMenu();if(!$('#bistro').hidden)renderBistro();if(!$('#done').hidden&&E.r)paintThumb($('#dishCv'),E.r.id,190);if(!$('#home').hidden)renderHome()};
-function boot(data){document.querySelectorAll('[data-pip]').forEach(el=>el.innerHTML=mayaHTML(el.dataset.pip||'idle'));if(data&&data.level&&LV[data.level])diff=LV[data.level];applyI18n();renderHome();openSettings()}
+window.refreshArt=()=>{if(!$('#menu').hidden)renderMenu();if(!$('#bistro').hidden)renderBistro();if(!$('#done').hidden&&E.r)paintThumb($('#dishCv'),E.r.id,190);if(!$('#start').hidden)renderHome()};
+function boot(data){document.querySelectorAll('[data-pip]').forEach(el=>el.innerHTML=mayaHTML(el.dataset.pip||'idle'));if(data&&data.level&&LV[data.level])diff=LV[data.level];applyI18n();renderHome();show('start')}
 window.claude?.hot?.snapshot?.(()=>({level:diff.id}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
